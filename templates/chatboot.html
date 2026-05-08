@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grups Automation AI Assistant</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+<div class="chat-container">
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+
+        <div class="logo-section">
+            <h2>GRUPS</h2>
+            <span>Automation AI</span>
+        </div>
+
+        <div class="menu-section">
+
+            <div class="menu-item active">
+                Industrial Assistant
+            </div>
+
+            <div class="menu-item">
+                Siemens PLC
+            </div>
+
+            <div class="menu-item">
+                Siemens HMI
+            </div>
+
+            <div class="menu-item">
+                Siemens VFD
+            </div>
+
+            <div class="menu-item">
+                WinCC SCADA
+            </div>
+
+            <div class="menu-item">
+                SICK Sensors
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Main Chat -->
+    <div class="main-chat">
+
+        <div class="topbar">
+            <h1>Grups Automation AI Assistant</h1>
+            <p>Industrial Automation Support Chatbot</p>
+        </div>
+
+        <div class="chat-box" id="chat-box">
+
+            <div class="bot-message">
+                <div class="message-content">
+                    Hello 👋 <br><br>
+
+                    I am your Industrial Automation AI Assistant.<br><br>
+
+                    Ask me anything related to:
+                    <ul>
+                        <li>PLC</li>
+                        <li>HMI</li>
+                        <li>SCADA</li>
+                        <li>VFD</li>
+                        <li>SICK Sensors</li>
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Input -->
+        <div class="input-section">
+
+            <form id="chat-form">
+
+                <input
+                    type="text"
+                    id="user-input"
+                    placeholder="Ask something about automation..."
+                    autocomplete="off"
+                    required
+                >
+
+                <button type="submit">Send</button>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+const form = document.getElementById("chat-form");
+const input = document.getElementById("user-input");
+const chatBox = document.getElementById("chat-box");
+
+form.addEventListener("submit", async (e) => {
+
+    e.preventDefault();
+
+    const message = input.value.trim();
+
+    if(message === "") return;
+
+    appendUserMessage(message);
+
+    input.value = "";
+
+const response = await fetch("http://127.0.0.1:8080/get", {
+
+    method: "POST",
+
+    headers: {
+        "Content-Type": "application/x-www-form-urlencoded"
+    },
+
+    body: new URLSearchParams({
+        msg: message
+    })
+
+});
+
+    const data = await response.text();
+
+    appendBotMessage(data);
+});
+
+function appendUserMessage(message) {
+
+    const div = document.createElement("div");
+
+    div.className = "user-message";
+
+    div.innerHTML = `
+        <div class="message-content">${message}</div>
+    `;
+
+    chatBox.appendChild(div);
+
+    chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+function appendBotMessage(message) {
+
+    const div = document.createElement("div");
+
+    div.className = "bot-message";
+
+    div.innerHTML = `
+        <div class="message-content">${message}</div>
+    `;
+
+    chatBox.appendChild(div);
+
+    chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+</script>
+
+</body>
+</html>
