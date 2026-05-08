@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Grups Automation AI Assistant</title>
+    <title>Grups AI Chatbot</title>
 
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 
@@ -15,89 +15,67 @@
 
 <body>
 
-<div class="chat-container">
+<div class="main-container">
 
     <!-- Sidebar -->
     <div class="sidebar">
 
-        <div class="logo-section">
-            <h2>GRUPS</h2>
-            <span>Automation AI</span>
+        <div class="sidebar-header">
+            <h2>GRUPS AI</h2>
+            <p>Recent Chats</p>
         </div>
 
-        <div class="menu-section">
-
-            <div class="menu-item active">
-                Industrial Assistant
-            </div>
-
-            <div class="menu-item">
-                Siemens PLC
-            </div>
-
-            <div class="menu-item">
-                Siemens HMI
-            </div>
-
-            <div class="menu-item">
-                Siemens VFD
-            </div>
-
-            <div class="menu-item">
-                WinCC SCADA
-            </div>
-
-            <div class="menu-item">
-                SICK Sensors
-            </div>
+        <div class="history-list" id="history-list">
 
         </div>
 
     </div>
 
-    <!-- Main Chat -->
-    <div class="main-chat">
+    <!-- Chatbot -->
+    <div class="chat-wrapper">
 
-        <div class="topbar">
-            <h1>Grups Automation AI Assistant</h1>
-            <p>Industrial Automation Support Chatbot</p>
+        <!-- Header -->
+        <div class="chat-header">
+
+            <div class="bot-logo">
+                🤖
+            </div>
+
+            <div>
+                <h2>Grups Automation AI</h2>
+                <p>Industrial AI Assistant</p>
+            </div>
+
         </div>
 
+        <!-- Chat Area -->
         <div class="chat-box" id="chat-box">
 
             <div class="bot-message">
-                <div class="message-content">
-                    Hello 👋 <br><br>
-
-                    I am your Industrial Automation AI Assistant.<br><br>
-
-                    Ask me anything related to:
-                    <ul>
-                        <li>PLC</li>
-                        <li>HMI</li>
-                        <li>SCADA</li>
-                        <li>VFD</li>
-                        <li>SICK Sensors</li>
-                    </ul>
+                <div class="message">
+                    Hello! 👋 <br><br>
+                    How can I help you today?
                 </div>
             </div>
 
         </div>
 
         <!-- Input -->
-        <div class="input-section">
+        <div class="chat-input">
 
             <form id="chat-form">
 
                 <input
                     type="text"
                     id="user-input"
-                    placeholder="Ask something about automation..."
+                    placeholder="Type your message..."
                     autocomplete="off"
                     required
                 >
 
-                <button type="submit">Send</button>
+                <button type="submit">
+                    ➤
+                </button>
 
             </form>
 
@@ -112,6 +90,8 @@
 const form = document.getElementById("chat-form");
 const input = document.getElementById("user-input");
 const chatBox = document.getElementById("chat-box");
+const historyList = document.getElementById("history-list");
+
 
 form.addEventListener("submit", async (e) => {
 
@@ -123,27 +103,59 @@ form.addEventListener("submit", async (e) => {
 
     appendUserMessage(message);
 
+    addHistory(message);
+
     input.value = "";
 
-const response = await fetch("http://127.0.0.1:8080/get", {
+    // Loading
+    const loadingDiv = document.createElement("div");
 
-    method: "POST",
+    loadingDiv.className = "bot-message loading";
 
-    headers: {
-        "Content-Type": "application/x-www-form-urlencoded"
-    },
+    loadingDiv.innerHTML = `
+        <div class="message">
+            Thinking...
+        </div>
+    `;
 
-    body: new URLSearchParams({
-        msg: message
-    })
+    chatBox.appendChild(loadingDiv);
+
+    chatBox.scrollTop = chatBox.scrollHeight;
+
+    try {
+
+        const response = await fetch("/get", {
+
+            method: "POST",
+
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+
+            body: new URLSearchParams({
+                msg: message
+            })
+
+        });
+
+        const data = await response.text();
+
+        loadingDiv.remove();
+
+        appendBotMessage(data);
+
+    } catch(error) {
+
+        loadingDiv.remove();
+
+        appendBotMessage("Error while getting response.");
+
+    }
 
 });
 
-    const data = await response.text();
 
-    appendBotMessage(data);
-});
-
+// User Message
 function appendUserMessage(message) {
 
     const div = document.createElement("div");
@@ -151,7 +163,9 @@ function appendUserMessage(message) {
     div.className = "user-message";
 
     div.innerHTML = `
-        <div class="message-content">${message}</div>
+        <div class="message">
+            ${message}
+        </div>
     `;
 
     chatBox.appendChild(div);
@@ -159,6 +173,8 @@ function appendUserMessage(message) {
     chatBox.scrollTop = chatBox.scrollHeight;
 }
 
+
+// Bot Message
 function appendBotMessage(message) {
 
     const div = document.createElement("div");
@@ -166,12 +182,27 @@ function appendBotMessage(message) {
     div.className = "bot-message";
 
     div.innerHTML = `
-        <div class="message-content">${message}</div>
+        <div class="message">
+            ${message.replace(/\\n/g, "<br>")}
+        </div>
     `;
 
     chatBox.appendChild(div);
 
     chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+
+// Sidebar History
+function addHistory(message) {
+
+    const item = document.createElement("div");
+
+    item.className = "history-item";
+
+    item.innerText = message;
+
+    historyList.prepend(item);
 }
 
 </script>
